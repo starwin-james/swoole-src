@@ -8,6 +8,7 @@ cd ${__DIR__} && cd ../tests/
 php ./init.php
 # run
 ./start.sh \
+-m \
 --set-timeout 25 \
 --show-diff \
 -w failed.list \
@@ -20,6 +21,7 @@ retry_failures()
 
     # and retry
     ./start.sh \
+    -m \
     --set-timeout 45 \
     --show-diff \
     -w failed.list \
