@@ -54,4 +54,4 @@ before_script:
   - php --ri swoole
 
 script:
-  - travis_wait 90 ./travis/route.sh
+  - ./travis/route.sh

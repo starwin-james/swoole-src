@@ -7,13 +7,6 @@ cd ${__DIR__} && cd ../tests/
 # initialization
 php ./init.php
 # run
-./start.sh \
--m \
---set-timeout 25 \
---show-diff \
--w failed.list \
-./swoole_*
-
 retry_failures()
 {
     # replace \n to space
@@ -28,16 +21,26 @@ retry_failures()
     "${failed_list}"
 }
 
-for i in 1 2 3
+for dir in "coro*" "e*" "f*" "g*" "http2_client_coro" "http_client_coro" "l*" "m*" "p*" "r*" "s*" "t*" "w*"
 do
-    if [ "`cat failed.list | grep "phpt"`" ]; then
-        echo "retry#${i}..."
-        retry_failures
-    else
-        exit 0
-    fi
-done
+    ./start.sh \
+    -m \
+    --set-timeout 25 \
+    --show-diff \
+    -w failed.list \
 
-if [ "`cat failed.list | grep "phpt"`" ]; then
-    exit 255
-fi
+    for i in 1 2 3
+    do
+        if [ "`cat failed.list | grep "phpt"`" ]; then
+            echo "retry#${i}..."
+            retry_failures
+        else
+            exit 0
+        fi
+    done
+
+    if [ "`cat failed.list | grep "phpt"`" ]; then
+        exit 255
+    fi
+
+done
