@@ -21,6 +21,7 @@ retry_failures()
     "${failed_list}"
 }
 
+# it need too much time, so we can only run the part of these
 for dir in "coro*" "e*" "f*" "g*" "http2_client_coro" "http_client_coro" "l*" "m*" "p*" "r*" "s*" "t*" "w*"
 do
     ./start.sh \
@@ -28,6 +29,7 @@ do
     --set-timeout 25 \
     --show-diff \
     -w failed.list \
+    "./swoole_${dir}"
 
     for i in 1 2 3
     do
