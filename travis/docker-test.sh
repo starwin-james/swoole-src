@@ -31,13 +31,13 @@ do
     -w failed.list \
     "./swoole_${dir}"
 
-    for i in 1 2 3
+    for i in 1 2 3 4 5
     do
         if [ "`cat failed.list | grep "phpt"`" ]; then
             echo "retry#${i}..."
             retry_failures
         else
-            exit 0
+            break
         fi
     done
 
