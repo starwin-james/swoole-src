@@ -15,7 +15,7 @@ retry_failures()
     # and retry
     ./start.sh \
     -m \
-    --set-timeout 45 \
+    --set-timeout 60 \
     --show-diff \
     -w failed.list \
     "${failed_list}"
@@ -31,7 +31,7 @@ do
     -w failed.list \
     "./swoole_${dir}"
 
-    for i in 1 2 3 4 5
+    for i in 1 2 3
     do
         if [ "`cat failed.list | grep "phpt"`" ]; then
             echo "retry#${i}..."
@@ -40,9 +40,5 @@ do
             break
         fi
     done
-
-    if [ "`cat failed.list | grep "phpt"`" ]; then
-        exit 255
-    fi
 
 done
