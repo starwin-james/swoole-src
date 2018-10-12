@@ -281,7 +281,11 @@ void php_swoole_event_wait()
 #endif
         if (!swReactor_empty(SwooleG.main_reactor))
         {
+        	struct timeval timeoutval={};
+        	timeoutval.tv_sec=0;
+        	timeoutval.tv_usec=1000;
             SW_SAVE_EG_SCOPE(scope);
+            swTrace("wait");
             int ret = SwooleG.main_reactor->wait(SwooleG.main_reactor, NULL);
             if (ret < 0)
             {
@@ -843,8 +847,10 @@ PHP_FUNCTION(swoole_event_dispatch)
         coro_init();
     }
 #endif
-
-    int ret = SwooleG.main_reactor->wait(SwooleG.main_reactor, NULL);
+    struct timeval timeo={};
+    timeo.tv_sec=0;
+    timeo.tv_usec=200000;
+    int ret = SwooleG.main_reactor->wait(SwooleG.main_reactor, &timeo);
     if (ret < 0)
     {
         swoole_php_fatal_error(E_ERROR, "reactor wait failed. Error: %s [%d]", strerror(errno), errno);

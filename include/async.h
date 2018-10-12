@@ -76,6 +76,7 @@ typedef struct
 extern swAsyncIO SwooleAIO;
 
 int swAio_init(void);
+int swAio_reinit(void);
 void swAio_free(void);
 int swAio_dispatch(swAio_event *_event);
 

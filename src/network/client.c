@@ -692,6 +692,9 @@ static int swClient_tcp_connect_async(swClient *cli, char *host, int port, doubl
         if (SwooleAIO.init == 0)
         {
             swAio_init();
+        }else{
+        	//swAio_reinit();
+        	cli->reactor->running = 1;
         }
 
         swAio_event ev;

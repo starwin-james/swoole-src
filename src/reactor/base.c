@@ -202,6 +202,7 @@ static void swReactor_onTimeout_and_Finish(swReactor *reactor)
     //not server, the event loop is empty
     if (SwooleG.serv == NULL && swReactor_empty(reactor))
     {
+    	swTrace("reactor->running = 0");
         reactor->running = 0;
     }
 

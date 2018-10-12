@@ -108,6 +108,7 @@ static void swReactorKqueue_free(swReactor *reactor)
 
 static int swReactorKqueue_add(swReactor *reactor, int fd, int fdtype)
 {
+	//swoole_print_trace();
     swReactorKqueue *this = reactor->object;
     struct kevent e;
     swFd fd_;
@@ -258,6 +259,7 @@ static int swReactorKqueue_del(swReactor *reactor, int fd)
 
 static int swReactorKqueue_wait(swReactor *reactor, struct timeval *timeo)
 {
+	//swTrace("start");
     swEvent event;
     swFd fd_;
     swReactorKqueue *object = reactor->object;
@@ -267,8 +269,8 @@ static int swReactorKqueue_wait(swReactor *reactor, struct timeval *timeo)
     struct timespec t;
     struct timespec *t_ptr;
     bzero(&t, sizeof(t));
-
-    if (reactor->timeout_msec == 0)
+    swTrace("timeout_msec:%d %d %d",reactor->timeout_msec,timeo->tv_sec,timeo->tv_usec);
+    if (reactor->timeout_msec == 0|| timeo->tv_sec>0 ||timeo->tv_usec>0)
     {
         if (timeo == NULL)
         {
@@ -281,9 +283,10 @@ static int swReactorKqueue_wait(swReactor *reactor, struct timeval *timeo)
     }
 
     reactor->start = 1;
-
+    swTrace("timeout_msec 2:%d",reactor->timeout_msec);
     while (reactor->running > 0)
     {
+    	swTrace("reactor running");
         if (reactor->onBegin != NULL)
         {
             reactor->onBegin(reactor);
@@ -298,8 +301,9 @@ static int swReactorKqueue_wait(swReactor *reactor, struct timeval *timeo)
         {
             t_ptr = NULL;
         }
-
+        swTrace("kevent");
         n = kevent(object->epfd, NULL, 0, object->events, object->event_max, t_ptr);
+        swTrace("kevent %d",n);
         if (n < 0)
         {
             swTrace("kqueue error.EP=%d | Errno=%d\n", object->epfd, errno);
@@ -310,7 +314,8 @@ static int swReactorKqueue_wait(swReactor *reactor, struct timeval *timeo)
             }
             else
             {
-                continue;
+                //continue;
+            	 return 0;
             }
         }
         else if (n == 0)
@@ -319,7 +324,8 @@ static int swReactorKqueue_wait(swReactor *reactor, struct timeval *timeo)
             {
                 reactor->onTimeout(reactor);
             }
-            continue;
+            //continue;
+            return 0;
         }
 
         for (i = 0; i < n; i++)
@@ -336,6 +342,7 @@ static int swReactorKqueue_wait(swReactor *reactor, struct timeval *timeo)
                         continue;
                     }
                     handle = swReactor_getHandle(reactor, SW_EVENT_READ, event.type);
+                    swTrace("read %d %d",i,n);
                     ret = handle(reactor, &event);
                     if (ret < 0)
                     {
@@ -351,6 +358,7 @@ static int swReactorKqueue_wait(swReactor *reactor, struct timeval *timeo)
                         continue;
                     }
                     handle = swReactor_getHandle(reactor, SW_EVENT_WRITE, event.type);
+                    swTrace("write");
                     ret = handle(reactor, &event);
                     if (ret < 0)
                     {
@@ -370,6 +378,7 @@ static int swReactorKqueue_wait(swReactor *reactor, struct timeval *timeo)
                     {
                         if (sw_signal->callback)
                         {
+                        	swTrace("signal");
                             sw_signal->callback(sw_signal->signo);
                         }
                         else
@@ -387,13 +396,16 @@ static int swReactorKqueue_wait(swReactor *reactor, struct timeval *timeo)
 
         if (reactor->onFinish != NULL)
         {
+        	//swTrace("onFinish");
             reactor->onFinish(reactor);
         }
         if (reactor->once)
         {
+        	//swTrace("break");
             break;
         }
     }
+    //swTrace("reactor finish");
     return 0;
 }
 #endif

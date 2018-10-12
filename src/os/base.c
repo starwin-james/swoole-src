@@ -78,8 +78,9 @@ int swAio_init(void)
     _pipe_write = _aio_pipe.getFd(&_aio_pipe, 1);
 
     SwooleG.main_reactor->setHandle(SwooleG.main_reactor, SW_FD_AIO, swAio_onCompleted);
+    swTrace("add start");
     SwooleG.main_reactor->add(SwooleG.main_reactor, _pipe_read, SW_FD_AIO);
-
+    swTrace("add finish");
     if (swThreadPool_run(&pool) < 0)
     {
         return SW_ERR;
@@ -89,6 +90,13 @@ int swAio_init(void)
 
     return SW_OK;
 }
+
+int swAio_reinit(void)
+{
+	SwooleG.main_reactor->add(SwooleG.main_reactor, _pipe_read, SW_FD_AIO);
+	return SW_OK;
+}
+
 
 void swAio_free(void)
 {
@@ -156,6 +164,8 @@ int daemon(int nochdir, int noclose)
 
 static int swAio_onCompleted(swReactor *reactor, swEvent *event)
 {
+	//swoole_print_trace();
+	swTrace("start");
     int i;
     swAio_event *events[SW_AIO_EVENT_NUM];
     int n = read(event->fd, events, sizeof(swAio_event*) * SW_AIO_EVENT_NUM);
@@ -166,6 +176,7 @@ static int swAio_onCompleted(swReactor *reactor, swEvent *event)
     }
     for (i = 0; i < n / sizeof(swAio_event*); i++)
     {
+    	swTrace("callback");
         events[i]->callback(events[i]);
         SwooleAIO.task_num--;
         sw_free(events[i]);
